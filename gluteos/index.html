@@ -134,6 +134,29 @@ h1{font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(
 .ldhist{flex-basis:100%;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .ldhist b{font-weight:700}.ldhist .up{color:var(--done)}.ldhist .dn{color:var(--hot)}
 .view{display:flex;flex-direction:column;gap:14px}
+.session{display:flex;flex-direction:column;gap:8px}
+.startbtn,.endbtn{min-height:58px;border-radius:14px;font-family:var(--display);font-weight:800;font-style:italic;font-size:1.4rem;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px}
+.startbtn{border:0;background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 24px -10px var(--accent)}
+.startbtn svg{width:20px;height:20px}
+.startbtn.donebtn{background:var(--done-soft);color:var(--done);border:1px solid var(--done);box-shadow:none;font-size:1.05rem;font-style:normal;letter-spacing:.02em;cursor:default}
+.live{display:flex;align-items:center;gap:10px;min-height:58px;padding:0 16px;border-radius:14px;background:var(--surface);border:1px solid var(--accent)}
+.live span{font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.live b{margin-left:auto;font-family:var(--display);font-weight:700;font-size:2rem;line-height:1;font-variant-numeric:tabular-nums}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--hot);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.endbtn{border:1.5px solid var(--accent);background:transparent;color:var(--accent)}
+.endbtn.ready{background:var(--done);border-color:var(--done);color:var(--done-ink)}
+.endbtn.warn{border-color:#c99a2e;color:#ffd77a;font-size:1.05rem;font-style:normal;letter-spacing:.02em}
+.chip.kc svg{color:var(--hot)}
+.me{display:flex;align-items:center;gap:14px}
+.avatar{width:88px;height:88px;border-radius:50%;flex:none;overflow:hidden;background:var(--surface);border:2px solid var(--accent);display:grid;place-items:center;color:var(--muted)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}.avatar svg{width:42px;height:42px}
+.me-txt{display:flex;flex-direction:column;gap:8px;min-width:0}
+.photo-btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn.sm{min-height:38px;font-size:.85rem;padding:0 12px;display:inline-flex;align-items:center;cursor:pointer}
+#photoMsg{font-size:.8rem;color:var(--hot)}
+.tabbar img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1.5px solid currentColor}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
 .cycchip{display:inline-block;margin-top:10px;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.09);color:var(--hero-fg)}
 .cycchip:empty{display:none}
 .deload{background:#33260a;border:1px solid #c99a2e;color:#ffd77a;border-radius:14px;padding:12px 14px;font-size:.9rem;line-height:1.4}
@@ -248,9 +271,9 @@ body.resting .wrap{padding-bottom:200px}
       </div>
     </div>
     <div class="stats">
-      <div class="stat"><b id="stEx">0</b><span>Exercícios</span></div>
       <div class="stat"><b id="stSets">0</b><span>Séries</span></div>
       <div class="stat"><b id="stMin">0</b><span>Minutos</span></div>
+      <div class="stat"><b id="stKcal">0</b><span>Kcal (est.)</span></div>
     </div>
   </section>
 
@@ -262,13 +285,18 @@ body.resting .wrap{padding-bottom:200px}
     <div class="progress"><div class="bar"><span id="bar"></span></div><span id="count">0/0 séries</span></div>
   </div>
 
+  <div class="session">
+    <button class="startbtn" id="startBtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg><span id="startTxt">Iniciar treino</span></button>
+    <div class="live" id="live" hidden><i class="dot"></i><span>Treino em andamento</span><b id="elapsed">0:00</b></div>
+  </div>
   <div class="deload" id="deload" hidden><b>Semana de deload.</b> Faça metade das séries, com a mesma técnica, para o corpo recuperar antes do próximo ciclo.</div>
   
   <ul class="list" id="list"></ul>
+  <button class="endbtn" id="endBtn" hidden>Finalizar treino</button>
   <div class="finish" id="finish" hidden>Treino concluído. Bom trabalho!</div>
 
   <div class="foot">
-    <span class="hint">Toque em cada série ao terminá-la e o descanso de 1:30 começa sozinho. O círculo à direita marca o exercício inteiro. <span class="legend"><i></i>Em vermelho, o músculo trabalhado.</span></span>
+    <span class="hint">Toque em cada série ao terminá-la e o descanso de 1:30 começa sozinho. Toque em <b>Iniciar treino</b> para começar a contar o tempo e em <b>Finalizar treino</b> no fim. O círculo à direita marca o exercício inteiro. <span class="legend"><i></i>Em vermelho, o músculo trabalhado.</span></span>
     <div class="notif" id="notifBox" hidden><button class="btn" id="notif">Avisar com a tela bloqueada</button><small id="notifTxt">Mostra uma notificação com vibração quando o descanso acabar, mesmo com o app em segundo plano.</small></div>
     <button class="btn" id="reset">Limpar treino</button>
   </div>
@@ -288,7 +316,9 @@ body.resting .wrap{padding-bottom:200px}
  <div class="view" id="vPerfil" hidden>
   <section class="phead">
     <div class="eyebrow" style="color:var(--accent)">Perfil</div>
-    <h1 class="ph1">Meus dados</h1>
+    <div class="me"><div class="avatar" id="avatar"></div><div class="me-txt"><h1 class="ph1">Meus dados</h1>
+      <div class="photo-btns"><label class="btn sm" for="photoIn" id="photoLbl">Adicionar foto</label><button class="btn sm" id="photoDel" hidden>Remover</button></div>
+      <input id="photoIn" type="file" accept="image/*" hidden><span id="photoMsg" hidden></span></div></div>
   </section>
   <div class="panel">
     <div class="fields">
@@ -629,7 +659,7 @@ function exSVGu(key,u){return `<svg viewBox="${realBox(key)}" aria-hidden="true"
 
 </script>
 <script>
-const W={"A": [{"n": "Elevação pélvica (hip thrust)", "s": 4, "r": "8–10", "k": "hipthrust", "cad": "", "mt": 0, "m": "Glúteo máximo", "nl": 0}, {"n": "Agachamento livre (ou Smith)", "s": 4, "r": "8–10", "k": "squat", "cad": "", "mt": 0, "m": "Quadríceps · Glúteos", "nl": 0}, {"n": "Agachamento búlgaro", "s": 3, "r": "10–12 cada perna", "k": "bulgarian", "cad": "", "mt": 0, "m": "Glúteos · Quadríceps", "nl": 0}, {"n": "Cadeira abdutora", "s": 3, "r": "15–20", "k": "abductor", "cad": "", "mt": 0, "m": "Glúteo médio", "nl": 0}, {"n": "Panturrilha em pé", "s": 3, "r": "12–15", "k": "calf", "cad": "", "mt": 0, "m": "Panturrilhas", "nl": 0}, {"n": "Puxada frontal", "s": 2, "r": "10–12", "k": "pulldown", "cad": "", "mt": 0, "m": "Costas · Manutenção", "nl": 0}, {"n": "Supino reto com halteres", "s": 2, "r": "10–12", "k": "dbbench", "cad": "", "mt": 0, "m": "Peitoral · Manutenção", "nl": 0}, {"n": "HIIT na bike", "s": 1, "r": "8 × 20 s forte / 40 s leve", "k": "bike", "cad": "", "mt": 0, "m": "Finalizador · Cardio", "nl": 1}], "B": [{"n": "Stiff com barra", "s": 4, "r": "8–10", "k": "rdl", "cad": "", "mt": 0, "m": "Posteriores · Glúteos", "nl": 0}, {"n": "Leg press 45° (pés altos)", "s": 4, "r": "10–12", "k": "legpress", "cad": "", "mt": 0, "m": "Glúteos · Posteriores", "nl": 0}, {"n": "Glúteo no cabo (coice)", "s": 3, "r": "12–15 cada perna", "k": "kickback", "cad": "", "mt": 0, "m": "Glúteo máximo", "nl": 0}, {"n": "Cadeira flexora", "s": 3, "r": "10–12", "k": "legcurl", "cad": "", "mt": 0, "m": "Posteriores", "nl": 0}, {"n": "Cadeira extensora", "s": 3, "r": "12–15", "k": "legext", "cad": "", "mt": 0, "m": "Quadríceps", "nl": 0}, {"n": "Remada baixa no cabo", "s": 2, "r": "10–12", "k": "cablerow", "cad": "", "mt": 0, "m": "Costas · Manutenção", "nl": 0}, {"n": "Desenvolvimento com halteres", "s": 2, "r": "10–12", "k": "ohp", "cad": "", "mt": 0, "m": "Ombros · Manutenção", "nl": 0}, {"n": "Prancha frontal", "s": 3, "r": "30–45 s", "k": "plank", "cad": "", "mt": 0, "m": "Core", "nl": 1}, {"n": "Escada ou esteira inclinada", "s": 1, "r": "10 min · 1 min forte / 1 min leve", "k": "stairs", "cad": "", "mt": 0, "m": "Finalizador · Cardio", "nl": 1}]};
+const W={"A": [{"n": "Elevação pélvica (hip thrust)", "s": 4, "r": "8–10", "k": "hipthrust", "cad": "", "mt": 0, "m": "Glúteo máximo", "nl": 0, "tmin": 9.0, "met": 6.0}, {"n": "Agachamento livre (ou Smith)", "s": 4, "r": "8–10", "k": "squat", "cad": "", "mt": 0, "m": "Quadríceps · Glúteos", "nl": 0, "tmin": 9.0, "met": 6.0}, {"n": "Agachamento búlgaro", "s": 3, "r": "10–12 cada perna", "k": "bulgarian", "cad": "", "mt": 0, "m": "Glúteos · Quadríceps", "nl": 0, "tmin": 7.5, "met": 5.5}, {"n": "Cadeira abdutora", "s": 3, "r": "15–20", "k": "abductor", "cad": "", "mt": 0, "m": "Glúteo médio", "nl": 0, "tmin": 6.0, "met": 4.0}, {"n": "Panturrilha em pé", "s": 3, "r": "12–15", "k": "calf", "cad": "", "mt": 0, "m": "Panturrilhas", "nl": 0, "tmin": 5.5, "met": 4.0}, {"n": "Puxada frontal", "s": 2, "r": "10–12", "k": "pulldown", "cad": "", "mt": 0, "m": "Costas · Manutenção", "nl": 0, "tmin": 3.5, "met": 5.5}, {"n": "Supino reto com halteres", "s": 2, "r": "10–12", "k": "dbbench", "cad": "", "mt": 0, "m": "Peitoral · Manutenção", "nl": 0, "tmin": 3.5, "met": 5.5}, {"n": "HIIT na bike", "s": 1, "r": "8 × 20 s forte / 40 s leve", "k": "bike", "cad": "", "mt": 0, "m": "Finalizador · Cardio", "nl": 1, "tmin": 8, "met": 8.5}], "B": [{"n": "Stiff com barra", "s": 4, "r": "8–10", "k": "rdl", "cad": "", "mt": 0, "m": "Posteriores · Glúteos", "nl": 0, "tmin": 7.5, "met": 5.5}, {"n": "Leg press 45° (pés altos)", "s": 4, "r": "10–12", "k": "legpress", "cad": "", "mt": 0, "m": "Glúteos · Posteriores", "nl": 0, "tmin": 9.5, "met": 6.0}, {"n": "Glúteo no cabo (coice)", "s": 3, "r": "12–15 cada perna", "k": "kickback", "cad": "", "mt": 0, "m": "Glúteo máximo", "nl": 0, "tmin": 7.5, "met": 4.0}, {"n": "Cadeira flexora", "s": 3, "r": "10–12", "k": "legcurl", "cad": "", "mt": 0, "m": "Posteriores", "nl": 0, "tmin": 5.0, "met": 4.0}, {"n": "Cadeira extensora", "s": 3, "r": "12–15", "k": "legext", "cad": "", "mt": 0, "m": "Quadríceps", "nl": 0, "tmin": 5.5, "met": 4.0}, {"n": "Remada baixa no cabo", "s": 2, "r": "10–12", "k": "cablerow", "cad": "", "mt": 0, "m": "Costas · Manutenção", "nl": 0, "tmin": 3.5, "met": 5.5}, {"n": "Desenvolvimento com halteres", "s": 2, "r": "10–12", "k": "ohp", "cad": "", "mt": 0, "m": "Ombros · Manutenção", "nl": 0, "tmin": 3.5, "met": 5.5}, {"n": "Prancha frontal", "s": 3, "r": "30–45 s", "k": "plank", "cad": "", "mt": 0, "m": "Core", "nl": 1, "tmin": 4.5, "met": 3.8}, {"n": "Escada ou esteira inclinada", "s": 1, "r": "10 min · 1 min forte / 1 min leve", "k": "stairs", "cad": "", "mt": 0, "m": "Finalizador · Cardio", "nl": 1, "tmin": 10, "met": 9.0}]};
 const MIN={"A": 60, "B": 65}, KEY="gp", SETLB=null, LOADLB="Carga usada";
 const VID={"squat": "agachamento livre com barra", "bench": "supino reto com barra", "row": "remada curvada com barra", "rdl": "stiff com barra", "ohp": "desenvolvimento com halteres sentado", "curl": "rosca direta barra W", "calf": "panturrilha em pé máquina", "plank": "prancha abdominal", "bike": "hiit bike ergométrica", "legpress": "leg press 45", "pulldown": "puxada frontal", "incline": "supino inclinado com halteres", "legcurl": "cadeira flexora", "cablerow": "remada baixa triângulo", "lateral": "elevação lateral com halteres", "pushdown": "tríceps corda polia", "crunch": "abdominal no cabo ajoelhado", "swing": "kettlebell swing", "hipthrust": "elevação pélvica com barra hip thrust", "bulgarian": "agachamento búlgaro com halteres", "abductor": "cadeira abdutora", "dbbench": "supino reto com halteres", "kickback": "glúteo no cabo coice", "legext": "cadeira extensora", "stairs": "escada simulador stair climber"};
 let cur="A", state={A:{},B:{}};
@@ -649,6 +679,8 @@ function histHTML(rec){if(!rec||rec.v==null)return "Anote a carga para acompanha
 function save(){try{localStorage.setItem(KEY+"-state",JSON.stringify(state));localStorage.setItem(KEY+"-tab",cur)}catch(e){}}
 const tick='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const clock='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+const flame='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3.5 5 5.6 5 10.5A5 5 0 0 1 7 12.6c0-2.2 1.1-3.6 2.3-4.8.2 1.6 1 2.7 2.1 3.1C11 8 11.3 5 12 2z"/></svg>';
+const fmtMin=v=>String(Math.round(v*2)/2).replace(".",",");
 const play='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
 const $=id=>document.getElementById(id);
 function repsLabel(r){return /^\d+–\d+( |$)/.test(r)&&!/ s$/.test(r)?r.replace(/^(\d+–\d+)/,"$1 reps"):r}
@@ -664,7 +696,7 @@ function render(){
     const all=st.every(Boolean);
     const li=document.createElement("li");li.className="card"+(all?" done":"");
     li.innerHTML=`<div class="head"><span class="idx">${String(i+1).padStart(2,"0")}</span><div><span class="mus">${m}</span><h2 class="name">${n}</h2></div><button class="chk" role="checkbox" aria-checked="${all}" aria-label="Marcar ${n} como feito">${tick}</button></div>`+
-     `<div class="chips"><span class="chip">${s} ${s>1?"séries":"série"}</span><span class="chip">${repsLabel(r)}</span>${cad?`<span class="chip cad">${clock}${cad}</span>`:""}</div>`+
+     `<div class="chips"><span class="chip">${s} ${s>1?"séries":"série"}</span><span class="chip">${repsLabel(r)}</span>${cad?`<span class="chip cad">${clock}${cad}</span>`:""}<span class="chip kc">${flame}~${fmtMin(x.tmin)} min · ~${kcalEx(x)} kcal</span></div>`+
      (k&&EX[k]?`<div class="demo" data-k="${k}"><div class="anim">${exSVGu(k,0)}</div><div class="demo-txt"><span class="ph on" data-i="0"><i>1</i><span>${EX[k].lb[0]}</span></span><span class="ph" data-i="1"><i>2</i><span>${EX[k].lb[1]}</span></span><a class="vid" href="https://www.youtube.com/results?search_query=${encodeURIComponent((VID[k]||n)+" execução correta")}" target="_blank" rel="noopener">${play}Ver vídeo</a></div></div>`:"")+
      (x.nl?"":`<div class="load"><label for="ld-${cur}-${i}">${LOADLB}</label><div class="stepper"><button type="button" data-d="-2.5" aria-label="Diminuir 2,5 kg">−</button><input id="ld-${cur}-${i}" type="text" inputmode="decimal" autocomplete="off" placeholder="—" value="${loads[cur][i]&&loads[cur][i].v!=null?kg(loads[cur][i].v):""}"><span>kg</span><button type="button" data-d="2.5" aria-label="Aumentar 2,5 kg">+</button></div><div class="ldhist">${histHTML(loads[cur][i])}</div></div>`)+
      `<div class="sets"></div>`;
@@ -683,12 +715,10 @@ function render(){
   });
   const p=tot?dn/tot:0;
   const meta=(state.meta||(state.meta={}))[cur]||(state.meta[cur]={});
-  if(tot>0&&dn===tot&&meta.start&&!meta.logged){meta.min=Math.max(1,Math.round((Date.now()-meta.start)/60000));meta.kcal=kcal(MET.musc,meta.min);meta.logged=true;hist.push({d:today(),w:cur,min:meta.min,kcal:meta.kcal});saveHist();save();refreshAux()}
-  $("finish").textContent=meta.logged?`Treino concluído · ${meta.min} min · ~${meta.kcal} kcal`:"Treino concluído. Bom trabalho!";
+  sessionUI(meta,tot,dn);
   $("bar").style.width=(p*100)+"%";$("count").textContent=`${dn}/${tot} séries`;
   $("ring").style.strokeDashoffset=(194.8*(1-p)).toFixed(1);$("pct").textContent=Math.round(p*100)+"%";
-  $("eyebrow").textContent="Treino "+cur;$("stEx").textContent=W[cur].length;$("stSets").textContent=tot;$("stMin").textContent="~"+MIN[cur];
-  $("finish").hidden=!(tot>0&&dn===tot);
+  $("eyebrow").textContent="Treino "+cur;$("stSets").textContent=tot;$("stMin").textContent="~"+Math.round(W[cur].reduce((a,x)=>a+x.tmin,0));$("stKcal").textContent="~"+W[cur].reduce((a,x)=>a+kcalEx(x),0);
 }
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{cur=t.dataset.w;save();render();window.scrollTo(0,0)});
 const rb=$("reset");
@@ -739,8 +769,40 @@ const DOW=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
 const kpi=(b,s,sm)=>`<div class="kpi"><b>${b}</b><span>${s}</span>${sm?`<small>${sm}</small>`:""}</div>`;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const dec=(v,n=1)=>(+v).toFixed(n).replace(".",",");
-function markStart(){const m=state.meta||(state.meta={});m[cur]=m[cur]||{};if(!m[cur].start)m[cur].start=Date.now();state.day=today()}
-if(state.day&&state.day!==today()){state={A:{},B:{}};save()}
+function markStart(){const m=state.meta||(state.meta={});m[cur]=m[cur]||{};if(m[cur].logged)return;if(!m[cur].start)m[cur].start=Date.now();m[cur].last=Date.now();state.day=today()}
+const kcalEx=x=>Math.round(x.met*(prof.peso||PROF0.peso)*x.tmin/60);
+function sessKcal(w){return Math.round(W[w].reduce((a,x,i)=>{const st=state[w][i]||[];const f=st.length?st.filter(Boolean).length/st.length:0;return a+kcalEx(x)*f},0))}
+function setsDone(w){return W[w].reduce((a,x,i)=>a+((state[w][i]||[]).filter(Boolean).length),0)}
+function setsTot(w){return W[w].reduce((a,x)=>a+x.s,0)}
+function finalize(w,endAt,day){const m=state.meta[w];const end=endAt||Date.now();m.min=Math.max(1,Math.round((end-m.start)/60000));m.kcal=sessKcal(w);m.sets=setsDone(w);m.logged=true;
+ hist.push({d:day||today(),w,min:m.min,kcal:m.kcal,sets:m.sets,tot:setsTot(w)});saveHist();save()}
+// a workout left open from another day is closed with the time of its last marked set
+if(state.day&&state.day!==today()){["A","B"].forEach(w=>{const m=state.meta&&state.meta[w];if(m&&m.start&&!m.logged&&setsDone(w)>0)finalize(w,(m.last||m.start)+60000,state.day)});state={A:{},B:{}};save()}
+const fmtDur=ms=>{const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),mm=Math.floor(s%3600/60),ss=s%60;return (h?h+":"+String(mm).padStart(2,"0"):mm)+":"+String(ss).padStart(2,"0")};
+let endArmed=false;
+function sessionUI(meta,tot,dn){const sb=$("startBtn"),lv=$("live"),eb=$("endBtn"),fin=$("finish");
+ if(meta.logged){sb.hidden=false;sb.classList.add("donebtn");sb.disabled=true;$("startTxt").textContent=`Treino ${cur} concluído hoje`;lv.hidden=true;eb.hidden=true;
+  fin.hidden=false;fin.textContent=`Treino concluído · ${meta.min} min · ~${meta.kcal} kcal`+(meta.sets<tot?` · ${meta.sets}/${tot} séries`:"");return}
+ fin.hidden=true;
+ if(meta.start){sb.hidden=true;lv.hidden=false;$("elapsed").textContent=fmtDur(Date.now()-meta.start);eb.hidden=false;
+  if(!endArmed){eb.classList.toggle("ready",tot>0&&dn===tot);eb.classList.remove("warn");eb.textContent=tot>0&&dn===tot?"Finalizar treino ✓":"Finalizar treino"}}
+ else{sb.hidden=false;sb.classList.remove("donebtn");sb.disabled=false;$("startTxt").textContent=`Iniciar treino ${cur}`;lv.hidden=true;eb.hidden=true}}
+$("startBtn").onclick=()=>{if(state.meta&&state.meta[cur]&&state.meta[cur].logged)return;markStart();save();render();try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume&&actx.resume()}catch(e){}keepAwake()};
+$("endBtn").onclick=()=>{const eb=$("endBtn"),dn=setsDone(cur),tot=setsTot(cur);
+ if(dn<tot&&!endArmed){endArmed=true;eb.classList.remove("ready");eb.classList.add("warn");eb.textContent=`Faltam ${tot-dn} séries · toque de novo para finalizar`;setTimeout(()=>{endArmed=false;render()},3500);return}
+ endArmed=false;finalize(cur);stopRest();render();refreshAux();$("finish").scrollIntoView({behavior:"smooth",block:"center"})};
+setInterval(()=>{const m=state.meta&&state.meta[cur];if(m&&m.start&&!m.logged&&!$("vTreino").hidden)$("elapsed").textContent=fmtDur(Date.now()-m.start)},1000);
+/* foto de perfil */
+const PBTN=document.querySelector('.tabbar button[data-v="vPerfil"]'),PICON=PBTN.querySelector("svg").outerHTML;
+let photo=null;try{photo=localStorage.getItem(KEY+"-photo")}catch(e){}
+function drawPhoto(){const has=!!photo;$("avatar").innerHTML=has?`<img src="${photo}" alt="Foto de perfil">`:PICON;$("photoLbl").textContent=has?"Trocar foto":"Adicionar foto";$("photoDel").hidden=!has;PBTN.innerHTML=(has?`<img src="${photo}" alt="">`:PICON)+"Perfil"}
+function shrink(file,N){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(im.naturalWidth,im.naturalHeight),c=document.createElement("canvas");c.width=c.height=N;c.getContext("2d").drawImage(im,(im.naturalWidth-s)/2,(im.naturalHeight-s)/2,s,s,0,0,N,N);res(c.toDataURL("image/jpeg",.85))};im.onerror=rej;im.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
+$("photoIn").onchange=async e=>{const f=e.target.files&&e.target.files[0];e.target.value;if(!f)return;const msg=$("photoMsg");msg.hidden=true;
+ try{const url=await shrink(f,360);try{localStorage.setItem(KEY+"-photo",url);photo=url}catch(err){photo=url;msg.textContent="A foto aparece agora, mas não foi possível salvá-la neste aparelho.";msg.hidden=false}drawPhoto()}
+ catch(err){msg.textContent="Não consegui abrir essa imagem. Tente outra foto (JPG ou PNG).";msg.hidden=false}
+ e.target.value=""};
+$("photoDel").onclick=()=>{photo=null;try{localStorage.removeItem(KEY+"-photo")}catch(e){}drawPhoto()};
+drawPhoto();
 const waterGoal=()=>Math.max(6,Math.ceil((prof.peso||PROF0.peso)*35/250));
 function cycleInfo(){const first=hist.length?hist.map(h=>h.d).sort()[0]:null;const start=prof.cycle||first;if(!start)return null;
  const n=Math.max(0,Math.floor((parseISO(today())-parseISO(start))/864e5/7));return {wk:(n%8)+1,num:Math.floor(n/8)+1,start}}
@@ -778,8 +840,8 @@ function renderProf(){
  $("cycle").innerHTML=c?`<div class="cycbar">${Array.from({length:8},(_,i)=>`<i class="${i<c.wk?"on":""}${i===7?" dl":""}"></i>`).join("")}</div><p class="ctext">Semana <b>${c.wk} de 8</b>${c.num>1?` do ${c.num}º ciclo`:" do ciclo"}. ${c.wk===8?"<b>Semana de deload:</b> faça metade das séries, com a mesma técnica.":`Deload na semana 8 (faltam ${8-c.wk} semana${8-c.wk>1?"s":""}).`}</p><button class="btn" id="cycReset">Reiniciar ciclo a partir de hoje</button>`:`<p class="ctext">O ciclo de 8 semanas começa quando você concluir o primeiro treino de musculação.</p>`;
  const cr=$("cycReset");if(cr)cr.onclick=()=>{if(!cycArmed){cycArmed=true;cr.textContent="Toque de novo para confirmar";cr.classList.add("warn");setTimeout(()=>{cycArmed=false;if(cr.isConnected){cr.textContent="Reiniciar ciclo a partir de hoje";cr.classList.remove("warn")}},3000);return}
   cycArmed=false;prof.cycle=today();saveProf();renderProf();refreshAux()};
- const L=hist.slice(-40).reverse();
- $("hist").innerHTML=L.length?L.map(x=>{const d=parseISO(x.d);return `<li><span>${DOW[(d.getDay()+6)%7]} ${ddmm(x.d)} · Treino ${x.w}</span><em>${x.min} min · ~${x.kcal} kcal</em></li>`}).join(""):`<li><em>Nenhum treino concluído ainda. Ao marcar todas as séries, o treino entra aqui com a duração.</em></li>`}
+ const L=[...hist].sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0).slice(-40).reverse();
+ $("hist").innerHTML=L.length?L.map(x=>{const d=parseISO(x.d);return `<li><span>${DOW[(d.getDay()+6)%7]} ${ddmm(x.d)} · Treino ${x.w}</span><em>${x.min} min · ~${x.kcal} kcal${x.tot&&x.sets<x.tot?` · ${x.sets}/${x.tot} séries`:""}</em></li>`}).join(""):`<li><em>Nenhum treino concluído ainda. Ao tocar em Finalizar treino, ele entra aqui com a duração e as calorias.</em></li>`}
 function bindNum(id,key,min,max){$(id).onchange=()=>{const raw=$(id).value.trim();
  if(raw===""&&key==="idade"){prof.idade=null}
  else{const v=parseFloat(raw.replace(",","."));if(!isNaN(v)&&v>=min&&v<=max){const nv=Math.round(v*10)/10;
