@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Full Body">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-v2-192.png">
+<link rel="apple-touch-icon" href="icon-v2-apple-touch.png">
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}html{background:#060709}</style>
 </head>
 <body>
@@ -304,7 +304,7 @@ body.resting .wrap{padding-bottom:200px}
   <div class="finish" id="finish" hidden>Treino concluído. Bom trabalho!</div>
 
   <div class="foot">
-    <span class="hint">Toque em cada série ao terminá-la e o descanso de 1:30 começa sozinho. Toque em <b>Iniciar treino</b> para começar a contar o tempo e em <b>Finalizar treino</b> no fim. O círculo à direita marca o exercício inteiro. <span class="legend"><i></i>Em vermelho, o músculo trabalhado.</span></span>
+    <span class="hint">Toque em cada série ao terminá-la e o descanso de 1:15 começa sozinho. Toque em <b>Iniciar treino</b> para começar a contar o tempo e em <b>Finalizar treino</b> no fim. O círculo à direita marca o exercício inteiro. <span class="legend"><i></i>Em vermelho, o músculo trabalhado.</span></span>
     <div class="notif" id="notifBox" hidden><button class="btn" id="notif">Avisar com a tela bloqueada</button><small id="notifTxt">Mostra uma notificação com vibração quando o descanso acabar, mesmo com o app em segundo plano.</small></div>
     <button class="btn" id="reset">Limpar treino</button>
   </div>
@@ -352,7 +352,7 @@ body.resting .wrap{padding-bottom:200px}
 <div class="rest" id="rest" hidden role="timer" aria-live="polite">
   <div class="rest-in">
     <div class="rring"><svg viewBox="0 0 54 54"><circle class="trk" cx="27" cy="27" r="23"/><circle class="val" id="restRing" cx="27" cy="27" r="23" stroke-dasharray="144.5" stroke-dashoffset="0"/></svg><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></i></div>
-    <div class="rest-info"><span class="rest-lb" id="restLb">Descanso</span><span class="rest-time" id="restTime">1:30</span></div>
+    <div class="rest-info"><span class="rest-lb" id="restLb">Descanso</span><span class="rest-time" id="restTime">1:15</span></div>
     <div class="rest-btns"><button id="restPlus" aria-label="Mais 15 segundos">+15s</button><button id="restSkip">Pular</button></div>
   </div>
 </div>
@@ -734,7 +734,7 @@ rb.onclick=()=>{
   if(!armed){armed=true;rb.textContent="Toque de novo para confirmar";rb.classList.add("warn");setTimeout(()=>{armed=false;rb.textContent="Limpar treino";rb.classList.remove("warn")},3000);return}
   armed=false;state[cur]={};if(state.meta)state.meta[cur]={};save();render();stopRest();rb.textContent="Limpar treino";rb.classList.remove("warn");
 };
-const REST=90;let restEnd=0,restTot=REST,restTick=null,actx=null,beeped=false;
+const REST=75;let restEnd=0,restTot=REST,restTick=null,actx=null,beeped=false;
 function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[0,0.35,0.7].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.4,actx.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+t+0.25);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+0.3)})}catch(e){}try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}}
 let swReg=null;
 async function notifyEnd(){try{if(document.visibilityState==="hidden"&&swReg&&Notification.permission==="granted"){await swReg.showNotification("Descanso acabou",{body:"Hora da próxima série.",tag:"rest",renotify:true,vibrate:[400,200,400,200,400],icon:"icon-192.png",badge:"icon-192.png"});return true}}catch(e){}return false}
