@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Glúteos">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" href="icon-apple-touch.png">
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}html{background:#060709}</style>
 </head>
 <body>
@@ -866,6 +866,6 @@ if("serviceWorker" in navigator&&window.Notification){navigator.serviceWorker.ge
  $("notif").onclick=()=>Notification.requestPermission().then(()=>{notifUI();if(Notification.permission==="granted")r.showNotification("Aviso de descanso ativado",{body:"Você vai receber este aviso quando o descanso acabar.",tag:"rest",vibrate:[200],icon:"icon-192.png"})})}).catch(()=>{})}
 </script>
 
-<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script>
+<script>if("serviceWorker" in navigator){let had=!!navigator.serviceWorker.controller,done=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}});window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))}</script>
 </body>
 </html>
